@@ -12,7 +12,9 @@ from paddleocr import PaddleOCR
 from os import getenv
 from dotenv import load_dotenv
 
-load_dotenv("../dcfinanceocr.env")
+# Carga el .env desde la raíz del proyecto, independiente del CWD desde el que se arranque
+_ENV_PATH = Path(__file__).resolve().parents[2] / "dcfinanceocr.env"
+load_dotenv(_ENV_PATH)
 
 logging.disable(logging.WARNING)
 OCR = PaddleOCR(use_angle_cls=True, lang="es", show_log=False)
@@ -320,4 +322,4 @@ if __name__ == "__main__":
         asyncio.run(_main())
     except (FileNotFoundError, ValueError) as e:
         print(f"Error: {e}")
-        sys.exit(1)S
+        sys.exit(1)

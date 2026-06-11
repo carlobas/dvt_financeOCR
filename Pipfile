@@ -5,8 +5,23 @@ name = "pypi"
 
 [packages]
 fastapi = "*"
+uvicorn = "*"
+python-multipart = "*"
+mariadb = "*"
+
+# OCR - Las versiones son obligatorias, No cambiar las varsiones
+paddleocr = "==2.7.3"
+paddlepaddle = "==2.6.2"
+numpy = "<2.0"
+opencv-python = "*"
+pillow = "*"
+pymupdf = "*"
+
+# LLM (llama-server)
+httpx= "*"
+python-dotenv = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.14"
+python_version = "3.12"

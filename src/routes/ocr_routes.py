@@ -21,33 +21,42 @@ async def get_info_from_ocr(idusuario: str = Form(...), paymentmethod: int = For
         contents = await ticket.read()
     except Exception as e:
         print(f"Error reading file: {e}")
-        return {"code":"5","message": "Error occurred while reading the uploaded file"}
+        return construir_respuesta("5", "Error occurred while reading the uploaded file")
 
     try:
         file_size = len(contents)
         print(f"Received file: {ticket.filename} with size: {file_size} bytes")
     except Exception as e:
         print(f"Error occurred while processing the uploaded file: {e}")
-        return {"code":"5","message": "Error occurred while processing the uploaded file"}
+        return construir_respuesta("5", "Error occurred while processing the uploaded file")
 
     if paymentmethod in [7,8,9]:
         if paymentmethod != 7:
             card_payment = checkUserCard(idusuario, paymentmethod)
             if card_payment == 2:
-                return {"code":"2","message": "User not allowed to use company card for this payment!"}
+                return construir_respuesta("2", "User not allowed to use company card for this payment!")
             if card_payment == 3:
-                return {"code":"3","message": "User is allowed to use company card but card info is missing or not updated in the system"}
+                return construir_respuesta("3", "User is allowed to use company card but card info is missing or not updated in the system")
             if card_payment == 4:
-                return {"code":"4","message": "Error occurred while checking user card information"}
+                return construir_respuesta("4", "Error occurred while checking user card information")
     else:
-        return {"code":"1","message": "Payment method not allowed or recognized"}
+        return construir_respuesta("1", "Payment method not allowed or recognized")
     
     if card_payment == 0:
         #El pago es con efectivo o con una tarjeta que el usuario tiene permitido usar, se procesa el ticket OCR
         #Hacemos la petición al OCR
-        pass
-    
-    
+        try:
+            ocr = await procesar_completo(contents, ticket.filename)
+        except ValueError as e:
+            #Formato no soportado o imagen no decodificable
+            print(f"OCR validation error: {e}")
+            return construir_respuesta("6", f"Invalid or unsupported ticket file: {e}")
+        except Exception as e:
+            print(f"Error processing OCR: {e}")
+            return construir_respuesta("5", "Error occurred while processing the OCR")
+
+        return construir_respuesta("0", "OCR processed successfully", ocr)
+
 #***************************************************************
 #Return if user is allowed to use company card
 #To be confirmed: 7 is cash, 8 & 9 company cards (VISA & SOLRED)
